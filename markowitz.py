@@ -1,4 +1,5 @@
 from cvxpy import *
+import cvxpy as cp
 import numpy as np
 from posdef import nearestPD
 
@@ -30,11 +31,11 @@ def MarkowitzOpt(mean, variance, covariance, interest_rate, min_return):
     w = Variable(n)                         # Portfolio allocation vector
     ret = mu.T*	w
     risk = quad_form(w, Sigma)
-    min_ret = Parameter(sign='positive')
+    min_ret = Parameter(nonneg=True)
     min_ret.value = min_return
     prob = Problem(Minimize(risk),          # Restricting to long-only portfolio
                    [ret >= min_ret,
-                   sum_entries(w) == 1,
+                   cp.sum(w) == 1,
                    w >= 0])
     prob.solve()
     return w.value
