@@ -14,7 +14,7 @@ min_return = 0.02									# Minimum desired return
 # Read stock prices data
 price = pd.read_csv('StockPrices.csv')
 price.index = [datetime.strptime(x,'%Y-%m-%d') for x in price['Date']]
-price = price.drop('Date',1)
+price = price.drop('Date',axis=1)
 
 # Specify number of days to shift
 shift = 20
@@ -51,13 +51,13 @@ returns[index[date_index_iter]] = total_value
 
 while date_index_iter + 20 < end_index:
 	date = index[date_index_iter]
-	portfolio_alloc = MarkowitzOpt(shift_returns_mean.ix[date], shift_returns_var.ix[date], covariance.ix[date], interest_rate, min_return)
+	portfolio_alloc = MarkowitzOpt(shift_returns_mean.loc[date], shift_returns_var.loc[date], covariance.loc[date], interest_rate, min_return)
 	distribution[date.strftime('%Y-%m-%d')] = portfolio_alloc
 
 	# Calculating portfolio return
 	date2 = index[date_index_iter+shift]
-	temp1 = price.ix[date2]/price.ix[date]
-	temp1.ix[StockList[-1]] = interest_rate+1
+	temp1 = price.loc[date2]/price.loc[date]
+	temp1.loc[StockList[-1]] = interest_rate+1
 	temp2 = Series(np.array(portfolio_alloc.ravel()).reshape(len(portfolio_alloc)),index=StockList)
 	total_value = np.sum(total_value*temp2*temp1)
 	# Increment Date
@@ -69,7 +69,7 @@ returns = returns[np.isfinite(returns)]
 
 
 # Plot portfolio allocation of last 10 periods
-ax = distribution.T.ix[-10:].plot(kind='bar',stacked=True)
+ax = distribution.T.iloc[-10:].plot(kind='bar',stacked=True)
 plt.ylim([0,1])
 plt.xlabel('Date')
 plt.ylabel('distribution')
